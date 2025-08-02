@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/nodemon.json",
+  "watch": ["./*"],
+  "exec": "ts-node ./swagger.ts",
+  "ext": "js ts",
+  "ignore": ["app/"],
+  "stdin": false
+}
