@@ -6,7 +6,7 @@ dotenv.config({
 });
 
 const envConfig = {
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT || 3002,
   DATABASE_URI: process.env.DATABASE_URI,
   AUTH_SECRET: process.env.AUTH_SECRET,
   API_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_API_SERVER_URL,
