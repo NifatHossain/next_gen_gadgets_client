@@ -1,24 +1,33 @@
-const swaggerAutogen = require("swagger-autogen")();
-const app = require("./app");
+const swaggerAutogen = require("swagger-autogen")()
+const app = require("./app")
 
 const swaggerOptions = {
   info: {
-    title: "API Documentation",
+    title: "NextGenGadgets API Documentation",
     version: "1.0.0",
-    description: "API documentation CSE327 Next Gen Gadgets",
+    description: "API documentation for NextGenGadgets E-commerce Platform",
   },
-  host: "localhost:8000/api/v1",
+  host: "localhost:3002/api/v1",
   schemes: ["http"],
   servers: [
     {
-      url: "http://localhost:8000/api/v1",
+      url: "http://localhost:3002/api/v1",
     },
   ],
-};
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+}
 
-const outputFile = "./swagger/swagger_docs.json";
-const endpointsFiles = ["./routes/**/*.js"];
+const outputFile = "./swagger/swagger_docs.json"
+const endpointsFiles = ["./routes/**/*.js"]
 
 swaggerAutogen(outputFile, endpointsFiles, swaggerOptions).then(() => {
-  require("./server");
-});
+  require("./server")
+})
