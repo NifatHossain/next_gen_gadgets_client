@@ -1,37 +1,43 @@
-require("dotenv").config();
+require("dotenv").config()
 
-const express = require("express");
-const cors = require("cors");
+const express = require("express")
+const cors = require("cors")
 
-const connectDB = require("./config/database.config.js");
-const { swaggerUi } = require("./config/swagger.config.js");
-const swaggerOutput = require("./swagger/swagger_docs.json");
-const errorHandler = require("./middleware/error.middleware.js");
+const connectDB = require("./config/database.config.js")
+const { swaggerUi } = require("./config/swagger.config.js")
+const swaggerOutput = require("./swagger/swagger_docs.json")
+const errorHandler = require("./middleware/error.middleware.js")
+
+// Import routes
+const authRoutes = require("./routes/auth.routes.js")
 
 // Initialize Express app
-const app = express();
+const app = express()
 
 // Test route
 app.use("/test", (req, res) => {
-  res.send("Welcome to Next Gen Gadgets");
-});
+  res.send("Welcome to Next Gen Gadgets")
+})
 
 // CORS middleware
-app.use(cors({ credentials: true }));
+app.use(cors({ credentials: true }))
 
 // JSON parser
-app.use(express.json());
+app.use(express.json())
 
 // API router
-const apiV1Router = express.Router();
+const apiV1Router = express.Router()
+
+// Use routes
+apiV1Router.use("/auth", authRoutes)
 
 // Use API routes
-app.use("/api/v1", apiV1Router);
+app.use("/api/v1", apiV1Router)
 
 // Error middleware
-app.use(errorHandler);
+app.use(errorHandler)
 
 // Swagger docs
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput))
 
-module.exports = app;
+module.exports = app
