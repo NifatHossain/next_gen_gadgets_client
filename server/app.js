@@ -9,7 +9,7 @@ const swaggerOutput = require("./swagger/swagger_docs.json")
 const errorHandler = require("./middleware/error.middleware.js")
 
 // Import routes
-const authRoutes = require("./routes/auth.routes.js")
+// const authRoutes = require("./routes/auth.routes.js")
 
 // Initialize Express app
 const app = express()
@@ -29,7 +29,7 @@ app.use(express.json())
 const apiV1Router = express.Router()
 
 // Use routes
-apiV1Router.use("/auth", authRoutes)
+// apiV1Router.use("/auth", authRoutes)
 
 // Use API routes
 app.use("/api/v1", apiV1Router)

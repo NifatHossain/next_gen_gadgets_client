@@ -1,9 +1,9 @@
 const app = require("./app")
-const connectDB = require("./config/database.config")
+// const connectDB = require("./config/database.config")
 const envConfig = require("./config/env.config")
 
 // Connect to MongoDB
-connectDB()
+// connectDB()
 
 // Create Server
 app.listen(envConfig.PORT, () => {
