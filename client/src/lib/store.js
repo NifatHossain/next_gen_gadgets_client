@@ -1,17 +1,16 @@
-// store.js
 import { configureStore, combineReducers } from "@reduxjs/toolkit"
 import { persistReducer } from "redux-persist"
-import storage from "redux-persist/lib/storage" // defaults to localStorage
+import storage from "redux-persist/lib/storage"
 import userReducer from "@/_features/userSlice"
 import { authApi } from "@/_features/apiSlice/authApi"
-import { productsApi } from "@/_features/apiSlice/productsApi"
-import { usersApi } from "@/_features/apiSlice/usersApi"
+// import { productsApi } from "./api/productsApi"
+// import { usersApi } from "./api/usersApi"
 
 const rootReducer = combineReducers({
   user: userReducer,
   [authApi.reducerPath]: authApi.reducer,
-  [productsApi.reducerPath]: productsApi.reducer,
-  [usersApi.reducerPath]: usersApi.reducer,
+  // [productsApi.reducerPath]: productsApi.reducer,
+  // [usersApi.reducerPath]: usersApi.reducer,
 })
 
 const persistConfig = {
@@ -30,6 +29,6 @@ export const makeStore = () => {
         serializableCheck: {
           ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
         },
-      }).concat(authApi.middleware, productsApi.middleware, usersApi.middleware),
+      }).concat(authApi.middleware),
   })
 }

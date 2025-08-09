@@ -1,134 +1,150 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
-import { toast } from "react-hot-toast";
-import { BiShowAlt } from "react-icons/bi";
-import { GrFormViewHide } from "react-icons/gr";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setUser } from "@/_features/userSlice";
+import Link from "next/link"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { signIn, getSession } from "next-auth/react"
+import { toast } from "react-hot-toast"
+import { BiShowAlt } from "react-icons/bi"
+import { GrFormViewHide } from "react-icons/gr"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAppDispatch, useAppSelector } from "@/lib/hooks"
+import { setUser } from "@/_features/userSlice"
+import { useLoginMutation } from "@/_features/apiSlice/authApi"
 
 const Login = () => {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { isLoggedIn } = useAppSelector((state) => state.user);
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+  const { isLoggedIn } = useAppSelector((state) => state.user)
 
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [login] = useLoginMutation()
 
   useEffect(() => {
     const checkSession = async () => {
-      const session = await getSession();
+      const session = await getSession()
       if (session?.user) {
         dispatch(
           setUser({
             name: session.user.name || session.user.email?.split("@")[0] || "User",
             email: session.user.email || "",
-          })
-        );
-        router.push("/");
+          }),
+        )
+        router.push("/")
       }
-    };
-    checkSession();
-  }, [dispatch, router]);
+    }
+    checkSession()
+  }, [dispatch, router])
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push("/");
+      router.push("/")
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router])
 
-  const logIn = async (formData) => {
-    const email = formData.get("email");
-    const password = formData.get("password");
+  const handleLogin = async (formData) => {
+    const email = formData.get("email")
+    const password = formData.get("password")
 
     if (!email || !password) {
-      toast.error("Both email and password are required");
-      return;
+      toast.error("Both email and password are required")
+      return
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters long");
-      return;
+      toast.error("Password must be at least 6 characters long")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
+    try {
+      const result = await login({
+        email,
+        password,
+      }).unwrap()
+
+      if (result.success && result.data) {
+        dispatch(
+          setUser({
+            id: result.data.user.id,
+            name: result.data.user.name,
+            email: result.data.user.email,
+            role: result.data.user.role,
+            token: result.data.token,
+          }),
+        )
+        toast.success("Successfully logged in")
+        router.push("/")
+      }
+    } catch (error) {
+      toast.error(error.data?.error || "Login failed. Please try again!")
+      console.error("Login error:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fallback to NextAuth for demo purposes
+  const handleNextAuthLogin = async (formData) => {
+    const email = formData.get("email")
+    const password = formData.get("password")
+
+    setLoading(true)
     try {
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-      });
+      })
 
       if (result?.error) {
-        toast.error("Invalid credentials. Please try again!");
+        toast.error("Invalid credentials. Please try again!")
       } else {
-        const session = await getSession();
+        const session = await getSession()
         if (session?.user) {
           dispatch(
             setUser({
               name: session.user.name || session.user.email?.split("@")[0] || "User",
               email: session.user.email || "",
-            })
-          );
+            }),
+          )
         }
-        toast.success("Successfully logged in");
-        router.push("/");
+        toast.success("Successfully logged in")
+        router.push("/")
       }
     } catch (error) {
-      toast.error("Login failed. Please try again!");
-      console.error("Login error:", error);
+      toast.error("Login failed. Please try again!")
+      console.error("Login error:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const result = await signIn("google", {
         callbackUrl: "/",
         redirect: false,
-      });
+      })
 
       if (result?.error) {
-        toast.error("Google login failed. Please try again!");
+        toast.error("Google login failed. Please try again!")
       }
     } catch (error) {
-      toast.error("Google login failed. Please try again!");
-      console.error("Google login error:", error);
+      toast.error("Google login failed. Please try again!")
+      console.error("Google login error:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
-
-  // const handleGitHubLogin = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const result = await signIn("github", {
-  //       callbackUrl: "/dashboard",
-  //       redirect: false,
-  //     });
-
-  //     if (result?.error) {
-  //       toast.error("GitHub login failed. Please try again!");
-  //     }
-  //   } catch (error) {
-  //     toast.error("GitHub login failed. Please try again!");
-  //     console.error("GitHub login error:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  }
 
   if (isLoggedIn) {
-    return null;
+    return null
   }
 
   return (
@@ -141,9 +157,10 @@ const Login = () => {
         <CardContent className="space-y-4">
           <form
             onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              logIn(formData);
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              // Try backend API first, fallback to NextAuth
+              handleLogin(formData).catch(() => handleNextAuthLogin(formData))
             }}
             className="space-y-4"
           >
@@ -212,29 +229,26 @@ const Login = () => {
               onClick={handleGoogleLogin}
               disabled={loading}
             >
-              {/* Google SVG */}
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 262" className="mr-2">
-                <path fill="#4285f4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622l38.755 30.023l2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"/>
-                <path fill="#34a853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055c-34.523 0-63.824-22.773-74.269-54.25l-1.531.13l-40.298 31.187l-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"/>
-                <path fill="#fbbc05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82c0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602z"/>
-                <path fill="#eb4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"/>
+                <path
+                  fill="#4285f4"
+                  d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622l38.755 30.023l2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+                />
+                <path
+                  fill="#34a853"
+                  d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055c-34.523 0-63.824-22.773-74.269-54.25l-1.531.13l-40.298 31.187l-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+                />
+                <path
+                  fill="#fbbc05"
+                  d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82c0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602z"
+                />
+                <path
+                  fill="#eb4335"
+                  d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0C79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+                />
               </svg>
               Google
             </Button>
-
-            {/* <Button
-              type="button"
-              variant="outline"
-              className="bg-transparent"
-              onClick={handleGitHubLogin}
-              disabled={loading}
-            > */}
-              {/* GitHub SVG */}
-              {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
-                <path fill="currentColor" d="M12 0c-6.626 0-12 5.373-12 12..."/>
-              </svg> */}
-              {/* GitHub */}
-            {/* </Button> */}
           </div>
 
           <div className="flex flex-col space-y-2 text-center text-sm">
@@ -248,7 +262,7 @@ const Login = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

@@ -76,8 +76,20 @@ const Register = () => {
         password,
       }).unwrap()
 
-      toast.success("Registration successful! Please check your email for verification.")
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+      // Registration successful - user is auto-verified and gets token
+      if (result.success && result.data) {
+        dispatch(
+          setUser({
+            id: result.data.user.id,
+            name: result.data.user.name,
+            email: result.data.user.email,
+            role: result.data.user.role,
+            token: result.data.token,
+          }),
+        )
+        toast.success("Registration successful! Welcome to NextGenGadgets!")
+        router.push("/")
+      }
     } catch (error) {
       toast.error(error.data?.error || "Registration failed. Please try again!")
       console.error("Registration error:", error)

@@ -4,6 +4,13 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth`,
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().user.token
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`)
+      }
+      return headers
+    },
   }),
   tagTypes: ["Auth"],
   endpoints: (builder) => ({
@@ -21,17 +28,29 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
-    verifyEmail: builder.mutation({
+    oauthLogin: builder.mutation({
       query: (data) => ({
-        url: "/verify-email",
+        url: "/oauth-login",
         method: "POST",
         body: data,
       }),
     }),
-    resendVerification: builder.mutation({
+    getProfile: builder.query({
+      query: () => "/profile",
+      providesTags: ["Auth"],
+    }),
+    updateProfile: builder.mutation({
       query: (data) => ({
-        url: "/resend-verification",
-        method: "POST",
+        url: "/profile",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: "/change-password",
+        method: "PUT",
         body: data,
       }),
     }),
@@ -42,9 +61,9 @@ export const authApi = createApi({
         body: data,
       }),
     }),
-    socialLogin: builder.mutation({
+    resetPassword: builder.mutation({
       query: (data) => ({
-        url: "/social-login",
+        url: "/reset-password",
         method: "POST",
         body: data,
       }),
@@ -55,8 +74,10 @@ export const authApi = createApi({
 export const {
   useRegisterMutation,
   useLoginMutation,
-  useVerifyEmailMutation,
-  useResendVerificationMutation,
+  useOauthLoginMutation,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
   useForgotPasswordMutation,
-  useSocialLoginMutation,
+  useResetPasswordMutation,
 } = authApi

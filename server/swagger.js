@@ -1,5 +1,4 @@
-const swaggerAutogen = require("swagger-autogen")()
-const app = require("./app")
+const swaggerAutogen = require("swagger-autogen")({ openapi: "3.0.0" });
 
 const swaggerOptions = {
   info: {
@@ -7,8 +6,6 @@ const swaggerOptions = {
     version: "1.0.0",
     description: "API documentation for NextGenGadgets E-commerce Platform",
   },
-  host: "localhost:3002/api/v1",
-  schemes: ["http"],
   servers: [
     {
       url: "http://localhost:3002/api/v1",
@@ -23,11 +20,11 @@ const swaggerOptions = {
       },
     },
   },
-}
+};
 
-const outputFile = "./swagger/swagger_docs.json"
-const endpointsFiles = ["./routes/**/*.js"]
+const outputFile = "./swagger/swagger_docs.json";
+const endpointsFiles = ["./routes/**/*.js"];
 
 swaggerAutogen(outputFile, endpointsFiles, swaggerOptions).then(() => {
-  require("./server")
-})
+  require("./server");
+});
