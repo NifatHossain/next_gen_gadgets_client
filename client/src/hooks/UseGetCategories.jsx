@@ -4,7 +4,7 @@ const UseGetCategories = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:3002/all-categories`)
+    fetch(`http://localhost:3002/api/v1/all-categories`)
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((err) => console.error("Error fetching categories:", err));

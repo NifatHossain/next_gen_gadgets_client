@@ -26,7 +26,9 @@ const AddProduct = () => {
 
     console.log("Form Data ready to send:", data);
 	try {
-		const res = await axios.post('http://localhost:3002/api/v1/addProduct', data);
+		const res = await axios.post('http://localhost:3002/api/v1/addProduct', formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		});	
 		console.log("Product saved:", res.data);
 	} catch (err) {
 		console.error("Error saving product:", err);
