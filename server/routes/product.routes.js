@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct } = require("../controllers/product.controller");
+const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct, getAllCategories } = require("../controllers/product.controller");
 
 /**
  * @route POST /addProduct
@@ -61,5 +61,7 @@ router.patch("/updateProduct/:productId", updateProduct);
  * @returns {Error} 404 - User not found
  */
 router.delete("/deleteProduct/:productId", deleteSingleProduct);
+
+router.get("/allCategories",getAllCategories);
 
 module.exports = router;

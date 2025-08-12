@@ -13,6 +13,7 @@ const AddProduct = () => {
     formState: { errors },
     reset,
   } = useForm();
+
   const { data: categories = [], isLoading: categoriesLoading } = UseGetCategories();
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

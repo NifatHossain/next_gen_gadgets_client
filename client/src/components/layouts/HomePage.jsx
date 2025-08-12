@@ -4,8 +4,8 @@ import { useAppDispatch } from "@/lib/hooks";
 import { addToCart } from "@/_features/cartSlice";
 
 export default function HomePage() {
-  const dispatch = useAppDispatch();
 
+  const dispatch = useAppDispatch();
   // Hardcoded content for the homepage
   const promotions = [
     { id: 1, title: "Summer Sale", image: "/images/banner1.jpg" },
