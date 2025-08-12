@@ -7,6 +7,7 @@ const cors = require("cors");
 const errorHandler = require("./middleware/error.middleware.js");
 // Import routes
 const authRoutes = require("./routes/auth.routes.js");
+const productRoutes = require("./routes/product.routes.js");
 
 // Initialize Express app
 const app = express();
@@ -36,6 +37,7 @@ const apiV1Router = express.Router();
 
 // Use routes
 apiV1Router.use(authRoutes);
+apiV1Router.use(productRoutes);
 
 // Common API routes
 app.use("/api/v1", apiV1Router);
