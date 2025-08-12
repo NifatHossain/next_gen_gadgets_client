@@ -2,7 +2,6 @@
 import React from "react";
 
 export default function HomePage() {
-  // Hardcoded content for the homepage
   const promotions = [
     { id: 1, title: "Summer Sale", image: "/images/banner1.jpg" },
     { id: 2, title: "New Arrivals", image: "/images/banner2.jpg" },
