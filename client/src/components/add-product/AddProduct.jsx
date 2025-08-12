@@ -4,6 +4,7 @@ import UseGetCategories from "@/hooks/UseGetCategories";
 import axios from "axios";
 import React, { use, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const AddProduct = () => {
   const {
@@ -12,7 +13,7 @@ const AddProduct = () => {
     formState: { errors },
     reset,
   } = useForm();
-  const categories = ["Laptop", "Mobile", "Tablet", "Monitor"];
+  const categories = ["Laptop", "Phone", "Tablet", "Smatrtwatch"];
   const categories1= UseGetCategories();
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
@@ -26,12 +27,12 @@ const AddProduct = () => {
 
     console.log("Form Data ready to send:", data);
 	try {
-		const res = await axios.post('http://localhost:3002/api/v1/addProduct', formData, {
-			headers: { "Content-Type": "multipart/form-data" },
-		});	
+		const res = await axios.post('http://localhost:3002/api/v1/addProduct', data);	
 		console.log("Product saved:", res.data);
+		toast.success("Product added successfully!");
 	} catch (err) {
 		console.error("Error saving product:", err);
+		toast.error("Failed to add product.");
 	}
 
     reset();
@@ -110,7 +111,7 @@ const AddProduct = () => {
             <label className="block mb-1 font-medium">Product Image URL</label>
             <input
               type="text"
-              {...register("image", { required: "Image is required" })}
+              {...register("imageURL", { required: "Image is required" })}
               className="w-full border rounded p-2 "
             />
             {errors.image && (

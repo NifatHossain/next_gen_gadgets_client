@@ -1,33 +1,31 @@
 "use client";
+import UseGetAllProducts from "@/hooks/UseGetAllProducts";
 import axios from "axios";
+import Link from "next/link";
 import React from "react";
+import toast from "react-hot-toast";
 
 const AllProductsForAdmin = () => {
-  const products = [
-    {
-      imageURL: "https://i5.walmartimages.com/seo/HP-15-6-Ryzen-5-8GB-256GB-Laptop-Rose-Gold_36809cf3-480b-47a5-94f0-e1d5e70c58c0_3.fcc0d6494b0e279a13c32c80c28abfa3.jpeg",
-      productName: "Product A",
-      price: 25,
-    },
-    {
-      imageURL: "https://i5.walmartimages.com/seo/HP-15-6-Ryzen-5-8GB-256GB-Laptop-Rose-Gold_36809cf3-480b-47a5-94f0-e1d5e70c58c0_3.fcc0d6494b0e279a13c32c80c28abfa3.jpeg",
-      productName: "Product B",
-      price: 40,
-    },
-  ];
+  const [products, loading] = UseGetAllProducts();
+  console.log("Products:", products);
 
   const handleAction = (action, product) => {
     console.log(`Action: ${action}`, product);
   };
   const handleDeleteProduct = (productId) => {
-	console.log(`Delete product with ID: ${productId}`);
-	axios.delete(`http://localhost:3002/api/v1/deleteProduct/${productId}`)
-	  .then((response) => {
-		console.log("Product deleted successfully:", response.data);
-	  }).catch((error) => {
-		console.error("Error deleting product:", error);
-	  })
-  }	
+    console.log(`Delete product with ID: ${productId}`);
+    axios
+      .delete(`http://localhost:3002/api/v1/deleteProduct/${productId}`)
+      .then((response) => {
+        console.log("Product deleted successfully:", response.data);
+        toast.success("Product deleted successfully!");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error deleting product:", error);
+        toast.error("Failed to delete product.");
+      });
+  };
   return (
     <div className="overflow-x-auto flex justify-center">
       <table className="min-w-1/2 border border-gray-200 text-left text-sm">
@@ -40,38 +38,49 @@ const AllProductsForAdmin = () => {
           </tr>
         </thead>
         <tbody>
-          {products.map((product, idx) => (
-            <tr key={idx} className="hover:bg-gray-50">
-              <td className="px-4 py-2 border border-gray-200">
-                <img
-                  src={product.imageURL}
-                  alt={product.productName}
-                  className="w-14 h-14 object-cover rounded"
-                />
-              </td>
-              <td className="px-4 py-2 border border-gray-200">
-                {product.productName}
-              </td>
-              <td className="px-4 py-2 border border-gray-200">
-                ${product.price}
-              </td>
-              <td className="px-4 py-2 border border-gray-200">
-                <select
-                  className="border border-gray-300 rounded px-2 py-1"
-                  onChange={(e) => {
-                    if (e.target.value == 'delete') {
-                      handleDeleteProduct(product?._id);
-                    }
-                  }}
-                >
-                  <option value="">Select</option>
-                  <option value="update">Update</option>
-                  <option value="delete">Delete</option>
-                  <option value="view">View</option>
-                </select>
+          {loading ? (
+            <tr>
+              <td colSpan="4" className="text-center py-4">
+                Loading...
               </td>
             </tr>
-          ))}
+          ) : (
+            products.map((product) => (
+              <tr className="hover:bg-slate-50" key={product._id}>
+                <td className="px-4 py-2 border  border-gray-200">
+                  <img
+                    src={product.imageURL}
+                    alt={product.productName}
+                    className="w-16 h-16 object-cover"
+                  />
+                </td>
+                <td className="px-4 py-2 border border-gray-200">
+                  {product.productName}
+                </td>
+                <td className="px-4 py-2 border border-gray-200">
+                  ${product.price}
+                </td>
+                <td className="px-4 py-2 border border-gray-200">
+                  {/* <button
+					// onClick={() => handleAction("Edit", product)}
+					
+					
+				  > */}
+                  {/* Edit
+				  </button> */}
+                  {product?._id && (
+                    <Link className="bg-blue-500 text-white px-3 py-1 rounded mr-2" href={`/update-product/${product._id}`}>Update</Link>
+                  )}
+                  <button
+                    onClick={() => handleDeleteProduct(product._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
