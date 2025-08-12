@@ -1,10 +1,10 @@
-import AddToCart from '@/components/addToCart-order/AddToCart'
+import Order from '@/components/addToCart-order/Order'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <AddToCart />
+        <Order />
     </div>
   )
 }

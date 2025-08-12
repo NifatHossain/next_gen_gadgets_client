@@ -1,6 +1,14 @@
-import { useDispatch, useSelector, useStore } from 'react-redux'
+// Small wrapper hooks to keep usage consistent across the app and make TS migration easier later.
+import { useDispatch, useSelector } from "react-redux";
 
-// Use throughout your app instead of plain `useDispatch` and `useSelector`
-export const useAppDispatch = useDispatch
-export const useAppSelector = useSelector
-export const useAppStore = useStore
+/**
+ * Usage:
+ * const dispatch = useAppDispatch();
+ * const user = useAppSelector(state => state.user);
+ *
+ * We purposely return functions rather than binding to a store instance,
+ * so Next.js hydration and SSR mismatches are less likely.
+ */
+
+export const useAppDispatch = () => useDispatch();
+export const useAppSelector = useSelector;
