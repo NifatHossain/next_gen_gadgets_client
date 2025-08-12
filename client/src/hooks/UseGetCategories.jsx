@@ -1,16 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const UseGetCategories = () => {
-  const [categories, setCategories] = useState([]);
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:3002/api/v1/all-categories`)
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((err) => console.error("Error fetching categories:", err));
+    setIsLoading(true);
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/all-categories`)
+      .then((response) => {
+        if (response.data.success) {
+          setData(response.data.data || []);
+        } else {
+          setError("Failed to fetch categories.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+        setError(err.response?.data?.error || "Failed to fetch categories.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
-  return categories;
-}
+  return { data, isLoading, error };
+};
 
-export default UseGetCategories
+export default UseGetCategories;

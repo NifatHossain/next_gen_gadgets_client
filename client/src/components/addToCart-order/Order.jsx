@@ -10,22 +10,15 @@ import {
   selectCartDiscount,
   selectCartTotal,
   updateShipping,
-  updateTax,
   applyDiscount,
   clearCart,
 } from "@/_features/cartSlice";
-
-/**
- * Order (Checkout) component:
- * - reads cart values from redux
- * - allows selecting delivery & payment
- * - dispatches shipping cost and on-confirm clears cart
- *
- * Note: integrate with your backend order API in handleOrder when ready.
- */
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const Order = () => {
   const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cartItems = useAppSelector(selectCartItems) || [];
   const subtotal = useAppSelector(selectCartSubtotal) || 0;
@@ -59,18 +52,16 @@ const Order = () => {
   };
 
   const handleApplyDiscount = () => {
-    // placeholder - adapt to your promo logic
+    // Placeholder - adapt to your promo logic
     dispatch(applyDiscount(0));
   };
 
-  const handleOrder = () => {
-    // Validate minimal fields
+  const handleOrder = async () => {
     if (!customerInfo.firstName || !customerInfo.address || !customerInfo.mobile) {
-      alert("Please fill required fields: First name, Address, Mobile.");
+      toast.error("Please fill required fields: First name, Address, Mobile.");
       return;
     }
 
-    // Build payload that you would send to server
     const payload = {
       customer: customerInfo,
       paymentMethod,
@@ -85,11 +76,24 @@ const Order = () => {
       },
     };
 
-    console.log("Order payload (send to server):", payload);
-
-    // TODO: call your backend order endpoint here. On success:
-    dispatch(clearCart());
-    alert("Your order has been placed successfully!");
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/createOrder`,
+        payload
+      );
+      if (response.data.success) {
+        dispatch(clearCart());
+        toast.success("Your order has been placed successfully!");
+      } else {
+        toast.error("Failed to place order.");
+      }
+    } catch (err) {
+      console.error("Error creating order:", err);
+      toast.error(err.response?.data?.error || "Failed to place order.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const subtotalFixed = subtotal.toFixed(2);
@@ -166,7 +170,6 @@ const Order = () => {
                 <td className="p-2 border">{(item.price * item.quantity).toFixed(2)}৳</td>
               </tr>
             ))}
-
             <tr>
               <td colSpan="2" className="p-2 border text-right font-semibold">Sub-Total:</td>
               <td className="p-2 border">{subtotalFixed}৳</td>
@@ -194,14 +197,16 @@ const Order = () => {
           <button
             onClick={handleApplyDiscount}
             className="bg-yellow-500 text-black px-3 py-1 rounded"
+            disabled={isSubmitting}
           >
             Apply Discount (none)
           </button>
           <button
             onClick={handleOrder}
             className="bg-green-600 text-white px-6 py-2 rounded text-lg"
+            disabled={isSubmitting}
           >
-            Confirm Order
+            {isSubmitting ? "Placing Order..." : "Confirm Order"}
           </button>
         </div>
       </section>
