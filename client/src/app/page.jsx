@@ -1,9 +1,14 @@
+import Footer from '@/components/layouts/Footer'
+import Header from '@/components/layouts/Header'
+import HomePage from '@/components/layouts/HomePage'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <h1>Welcome to Next Gen Gadgets</h1>
+      <Header/>
+        <HomePage/>
+        <Footer/>
     </div>
   )
 }
