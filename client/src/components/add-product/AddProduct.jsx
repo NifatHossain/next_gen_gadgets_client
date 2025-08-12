@@ -13,8 +13,8 @@ const AddProduct = () => {
     formState: { errors },
     reset,
   } = useForm();
-  const categories = ["Laptop", "Phone", "Tablet", "Smatrtwatch"];
-  const categories1= UseGetCategories();
+//   const categories = ["Laptop", "Phone", "Tablet", "Smatrtwatch"];
+  const [categories,loading] = UseGetCategories();
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   const onSubmit = async(data) => {
@@ -129,7 +129,7 @@ const AddProduct = () => {
               }
             >
               <option value="">Select a category</option>
-              {categories.map((cat, idx) => (
+              {loading? <option>Loading...</option> : categories.map((cat, idx) => (
                 <option key={idx} value={cat}>
                   {cat}
                 </option>
