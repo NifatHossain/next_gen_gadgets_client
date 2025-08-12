@@ -1,10 +1,14 @@
-import AddToCart from '@/components/addToCart-order/AddToCart'
+import Footer from '@/components/layouts/Footer'
+import Header from '@/components/layouts/Header'
+import HomePage from '@/components/layouts/HomePage'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <AddToCart />
+      <Header/>
+        <HomePage/>
+        <Footer/>
     </div>
   )
 }
