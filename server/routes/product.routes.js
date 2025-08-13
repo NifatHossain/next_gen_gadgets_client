@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct, getAllCategories } = require("../controllers/product.controller");
+const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct, getAllCategories, searchProducts } = require("../controllers/product.controller");
 
 /**
  * @route POST /addProduct
@@ -83,7 +83,5 @@ router.get("/search", searchProducts);
  * @returns {Error} 500 - Server error
  */
 router.get("/all-categories", getAllCategories);
-
-router.get("/allCategories",getAllCategories);
 
 module.exports = router;
