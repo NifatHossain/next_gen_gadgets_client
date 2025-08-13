@@ -2,33 +2,23 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const useGetSingleProduct = (productId) => {
-  const [data, setData] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [product, setProduct] = useState([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     if (productId) {
-      setIsLoading(true);
-      axios
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/singleProduct/${productId}`)
-        .then((response) => {
-          if (response.data.success) {
-            setData(response.data.data || {});
-          } else {
-            setError("Failed to fetch product.");
-          }
+      setLoading(false);
+      fetch(`http://localhost:3002/api/v1/singleProduct/${productId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProduct(data);
+          setLoading(false);
         })
-        .catch((err) => {
-          console.error("Error fetching product:", err);
-          setError(err.response?.data?.error || "Failed to fetch product.");
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+        .catch((err) => console.error("Error fetching categories:", err));
     }
-  }, [productId]);
+  }, []);
 
-  return { data, isLoading, error };
+  return { product, isLoading};
 };
 
 export default useGetSingleProduct;

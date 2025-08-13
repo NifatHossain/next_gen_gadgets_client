@@ -16,41 +16,34 @@ const UpdateProduct = () => {
     reset,
   } = useForm();
   const { productId } = useParams();
-  const { data: product = {}, isLoading: productLoading } = useGetSingleProduct(productId);
-  const { data: categories = [], isLoading: categoriesLoading } = UseGetCategories();
+  const { product, productLoading } = useGetSingleProduct(productId);
+  const [categories , categoriesLoading ] = UseGetCategories();
+  console.log(categories)
   const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = async (data) => {
-    setIsSubmitting(true);
-    const payload = {
-      productName: data.productName,
-      brandName: data.brandName,
-      price: Number(data.price),
-      productStock: Number(data.productStock),
-      description: data.description,
-      category: isAddingCategory ? data.newCategory : data.category,
-      imageURL: data.imageURL,
-    };
+  const onSubmit = async(data) => {
+    const formData = new FormData();
+    formData.append("productName", data.productName);
+    formData.append("brandName", data.brandName);
+    formData.append("productStock", data.productStock);
+    formData.append("price", data.price);
+    formData.append("description", data.description);
+    formData.append("category",isAddingCategory ? data.newCategory : data.category);
+    formData.append("imageURL", data.imageURL);
 
-    try {
-      const response = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/updateProduct/${productId}`,
-        payload
-      );
-      if (response.data.success) {
-        toast.success("Product updated successfully!");
-        reset();
-        setIsAddingCategory(false);
-      } else {
-        toast.error("Failed to update product.");
-      }
-    } catch (err) {
-      console.error("Error updating product:", err);
-      toast.error(err.response?.data?.error || "Failed to update product.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    console.log("Form Data ready to send:", data);
+	try {
+		const res = await axios.patch(`http://localhost:3002/api/v1/updateProduct/${productId}`, data);	
+		console.log("Product saved:", res.data);
+		toast.success("Product added successfully!");
+    window.location.reload();
+	} catch (err) {
+		console.error("Error saving product:", err);
+		toast.error("Failed to add product.");
+	}
+
+    reset();
+    setIsAddingCategory(false);
   };
 
   return (
@@ -143,7 +136,7 @@ const UpdateProduct = () => {
                   onChange={(e) => setIsAddingCategory(e.target.value === "add-new")}
                 >
                   <option value="">Select a category</option>
-                  {categories.map((cat, idx) => (
+                  {!categoriesLoading && categories.map((cat, idx) => (
                     <option key={idx} value={cat}>
                       {cat}
                     </option>
@@ -173,9 +166,8 @@ const UpdateProduct = () => {
               <button
                 type="submit"
                 className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 cursor-pointer"
-                disabled={isSubmitting}
               >
-                {isSubmitting ? "Updating..." : "Update Product"}
+              Update Product
               </button>
             </form>
           </div>

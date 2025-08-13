@@ -77,10 +77,11 @@ export default function Footer() {
         <div>
           <h3 className="text-lg font-bold mb-3">Payment Methods</h3>
           <div className="flex flex-wrap gap-2">
-            <Image src="/images/visa.png" alt="Visa" width={50} height={30} />
-            <Image src="/images/mastercard.png" alt="MasterCard" width={50} height={30} />
-            <Image src="/images/bkash.png" alt="bKash" width={50} height={30} />
-            <Image src="/images/nagad.png" alt="Nagad" width={50} height={30} />
+            <ul>
+              <li>Bkash</li>
+              <li>Nagad</li>
+              <li>Rocket</li>
+            </ul>
           </div>
         </div>
       </div>

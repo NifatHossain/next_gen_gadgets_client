@@ -1,61 +1,49 @@
 "use client";
+import UseGetCategories from "@/hooks/UseGetCategories";
+import UseGetCategoryWiseProduct from "@/hooks/UseGetCategoryWiseProduct";
+import UseGetLatestProducts from "@/hooks/UseGetLatestProducts";
+import  Link  from "next/link";
 import React from "react";
-import { useAppDispatch } from "@/lib/hooks";
-import { addToCart } from "@/_features/cartSlice";
 
 export default function HomePage() {
 
-  const dispatch = useAppDispatch();
-  // Hardcoded content for the homepage
-  const promotions = [
-    { id: 1, title: "Summer Sale", image: "/images/banner1.jpg" },
-    { id: 2, title: "New Arrivals", image: "/images/banner2.jpg" },
-  ];
+  const [categories, categoryLoading] = UseGetCategories();
+  const [latestProducts, latestLoading] = UseGetLatestProducts();
+  const {categoryProducts, categoryProductLoading} = UseGetCategoryWiseProduct("Laptop");
+  const { categoryProducts:phones, categoryLoading:phonesLoading} = UseGetCategoryWiseProduct("Phone");
+  console.log("Category Products:", categoryProducts);  
+  console.log("Phones:", phones);
+  console.log("Latest Products:", latestProducts);
 
-  const categories = [
-    { id: 1, name: "Laptops", image: "/images/laptops.jpg" },
-    { id: 2, name: "Desktops", image: "/images/desktops.jpg" },
-    { id: 3, name: "Accessories", image: "/images/accessories.jpg" },
-  ];
-
-  const featuredProducts = [
-    { id: 1, name: "Gaming Laptop", image: "/images/laptop.jpg", price: 85000 },
-    { id: 2, name: "Mechanical Keyboard", image: "/images/keyboard.jpg", price: 4500 },
-    { id: 3, name: "4K Monitor", image: "/images/monitor.jpg", price: 28000 },
-  ];
-
-  const latestArrivals = [
-    { id: 4, name: "Wireless Mouse", image: "/images/mouse.jpg", price: 1200 },
-    { id: 5, name: "SSD 1TB", image: "/images/ssd.jpg", price: 9500 },
-  ];
-
-  const handleAddToCart = (product) => {
-    dispatch(
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: 1,
-        stock: 99999, // Replace with actual stock from backend if available
-      })
-    );
-  };
 
   return (
     <main className="p-6">
       {/* Hero Banner */}
       <section className="mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {promotions.map((promo) => (
-            <div key={promo.id} className="relative">
+        <h2 className="text-xl font-bold mb-4">Latest Products</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {!latestLoading && latestProducts.map((product,idx) => (
+            <div
+              key={product._id}
+              className="border rounded-lg p-3 shadow hover:shadow-lg"
+            >
               <img
-                src={promo.image}
-                alt={promo.title}
-                className="w-full h-64 object-cover rounded-lg shadow"
+                src={product?.imageURL}
+                alt={product.name}
+                className="w-full h-40 object-cover rounded"
               />
-              <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
-                {promo.title}
+              <h3 className="mt-2 font-medium">{product.productName}</h3>
+              <p className="text-red-500 font-bold">{product.price}</p>
+              <div className="flex flex-row justify-center">
+                <button className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                  Add to Cart
+                </button>
+                <Link
+                  href={`/product-details/${product?._id}`}
+                  className="mt-2 w-full bg-green-600 text-center text-white px-3 py-1 rounded hover:bg-green-700 ml-2"
+                >
+                 Details
+                </Link>
               </div>
             </div>
           ))}
@@ -66,77 +54,86 @@ export default function HomePage() {
       <section className="mb-6">
         <h2 className="text-xl font-bold mb-4">Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {categories.map((cat) => (
-            <div key={cat.id} className="text-center cursor-pointer">
+          {!categoryLoading && categories.map((cat,idx) => (
+            <div key={idx} className="text-center cursor-pointer">
               <img
-                src={cat.image}
+                src={
+                  cat.image ||
+                  "https://as2.ae/wp-content/uploads/2024/10/Gadgets-Examples.webp"
+                }
                 alt={cat.name}
                 className="w-full h-40 object-cover rounded-lg shadow"
               />
-              <p className="mt-2 font-medium">{cat.name}</p>
+              <p className="mt-2 font-medium">{cat}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* laptop */}
       <section className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Featured Products</h2>
+        <h2 className="text-xl font-bold mb-4">Laptops</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {featuredProducts.map((product) => (
-            <div key={product.id} className="border rounded-lg p-3 shadow hover:shadow-lg">
+          {!categoryProductLoading && categoryProducts.map((product) => (
+            <div
+              key={product._id}
+              className="border rounded-lg p-3 shadow hover:shadow-lg"
+            >
               <img
-                src={product.image}
-                alt={product.name}
+                src={product.imageURL}
                 className="w-full h-40 object-cover rounded"
               />
-              <h3 className="mt-2 font-medium">{product.name}</h3>
-              <p className="text-red-500 font-bold">{product.price}৳</p>
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-              >
-                Add to Cart
-              </button>
+              <h3 className="mt-2 font-medium">{product.productName}</h3>
+              <p className="text-red-500 font-bold">{product.price}</p>
+              <div className="flex flex-row justify-center">
+                <button className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                  Add to Cart
+                </button>
+                <Link
+                  href={`/product-details/${product?._id}`}
+                  className="mt-2 w-full bg-green-600 text-center text-white px-3 py-1 rounded hover:bg-green-700 ml-2"
+                >
+                 Details
+                </Link>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Latest Arrivals */}
-      <section>
-        <h2 className="text-xl font-bold mb-4">Latest Arrivals</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {latestArrivals.map((item) => (
-            <div key={item.id} className="border rounded-lg p-3 shadow hover:shadow-lg">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-40 object-cover rounded"
+      {/* Phone */}
+      <section className="mb-6">
+        <h2 className="text-xl font-bold mb-4">Phones</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {!phonesLoading && phones.map((phone) => (
+            <div
+              key={phone._id}
+              className="border rounded-lg p-3 shadow hover:shadow-lg"
+            >
+              <div className="flex justify-center">
+                <img
+                src={phone.imageURL}
+                className=" object-cover w-40 h-40  rounded"
               />
-              <h3 className="mt-2 font-medium">{item.name}</h3>
-              <p className="text-red-500 font-bold">{item.price}৳</p>
-              <button
-                onClick={() => handleAddToCart(item)}
-                className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-              >
-                Add to Cart
-              </button>
+              </div>
+              <h3 className="mt-2 font-medium">{phone.productName}</h3>
+              <p className="text-red-500 font-bold">{phone.price}</p>
+              <div className="flex flex-row justify-center">
+                <button className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                  Add to Cart
+                </button>
+                <Link
+                  href={`/product-details/${phone?._id}`}
+                  className="mt-2 w-full bg-green-600 text-center text-white px-3 py-1 rounded hover:bg-green-700 ml-2"
+                >
+                 Details
+                </Link>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Trust Building Section */}
-      <section className="bg-green-100 p-4 rounded-lg">
-        <h2 className="text-xl font-bold mb-4">Why Shop With Us?</h2>
-        <ul className="list-disc pl-5 space-y-2">
-          <li>Trusted by 10,000+ customers in Bangladesh</li>
-          <li>24/7 Customer Support</li>
-          <li>Easy Return Policies</li>
-          <li>Partnerships with top brands</li>
-        </ul>
-      </section>
     </main>
   );
 }

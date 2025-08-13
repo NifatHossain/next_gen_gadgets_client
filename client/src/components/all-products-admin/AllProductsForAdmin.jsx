@@ -7,26 +7,21 @@ import toast from "react-hot-toast";
 import UseGetAllProducts from "@/hooks/UseGetAllProducts";
 
 const AllProductsForAdmin = () => {
-  const { data: products = [], isLoading } = UseGetAllProducts();
-  const [isDeleting, setIsDeleting] = React.useState(null);
+  const { products, isLoading } = UseGetAllProducts();
 
-  const handleDeleteProduct = async (productId) => {
-    setIsDeleting(productId);
-    try {
-      const response = await axios.delete(
+  const handleDeleteProduct = (productId) => {
+    axios
+      .delete(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/deleteProduct/${productId}`
-      );
-      if (response.data.success) {
+      )
+      .then((response) => {
         toast.success("Product deleted successfully!");
-      } else {
-        toast.error("Failed to delete product.");
-      }
-    } catch (err) {
-      console.error("Error deleting product:", err);
-      toast.error(err.response?.data?.error || "Failed to delete product.");
-    } finally {
-      setIsDeleting(null);
-    }
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.error("Error deleting product:", err);
+        toast.error(err.response?.data?.error || "Failed to delete product.");
+      });
   };
 
   return (
@@ -63,8 +58,12 @@ const AllProductsForAdmin = () => {
                     className="w-16 h-16 object-cover"
                   />
                 </td>
-                <td className="px-4 py-2 border border-gray-200">{product.productName}</td>
-                <td className="px-4 py-2 border border-gray-200">{product.price}৳</td>
+                <td className="px-4 py-2 border border-gray-200">
+                  {product.productName}
+                </td>
+                <td className="px-4 py-2 border border-gray-200">
+                  ৳ {product.price}
+                </td>
                 <td className="px-4 py-2 border border-gray-200">
                   <Link
                     className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
@@ -75,9 +74,8 @@ const AllProductsForAdmin = () => {
                   <button
                     onClick={() => handleDeleteProduct(product._id)}
                     className="bg-red-500 text-white px-3 py-1 rounded cursor-pointer"
-                    disabled={isDeleting === product._id}
                   >
-                    {isDeleting === product._id ? "Deleting..." : "Delete"}
+                    Delete
                   </button>
                 </td>
               </tr>
