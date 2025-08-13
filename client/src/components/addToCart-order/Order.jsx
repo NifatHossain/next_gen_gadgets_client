@@ -13,7 +13,7 @@ import {
   applyDiscount,
   clearCart,
 } from "@/_features/cartSlice";
-import axios from "axios";
+// import axios from "axios";
 import toast from "react-hot-toast";
 
 const Order = () => {
@@ -39,7 +39,7 @@ const Order = () => {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  const [deliveryMethod, setDeliveryMethod] = useState("Home Delivery - 60৳");
+  const [deliveryMethod, setDeliveryMethod] = useState("Store Pickup - 0৳");
 
   const handleChange = (e) => {
     setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
@@ -77,23 +77,7 @@ const Order = () => {
     };
 
     setIsSubmitting(true);
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/createOrder`,
-        payload
-      );
-      if (response.data.success) {
-        dispatch(clearCart());
-        toast.success("Your order has been placed successfully!");
-      } else {
-        toast.error("Failed to place order.");
-      }
-    } catch (err) {
-      console.error("Error creating order:", err);
-      toast.error(err.response?.data?.error || "Failed to place order.");
-    } finally {
-      setIsSubmitting(false);
-    }
+     alert("Your order has been placed successfully!");
   };
 
   const subtotalFixed = subtotal.toFixed(2);
@@ -196,10 +180,10 @@ const Order = () => {
         <div className="flex items-center gap-3 mt-4">
           <button
             onClick={handleApplyDiscount}
-            className="bg-yellow-500 text-black px-3 py-1 rounded"
+            className="bg-yellow-500 text-black px-6 py-2 rounded text-lg"
             disabled={isSubmitting}
           >
-            Apply Discount (none)
+            Apply Discount
           </button>
           <button
             onClick={handleOrder}
