@@ -1,7 +1,11 @@
-const User = require("../models/auth.model")
-const ErrorResponse = require("../utils/ErrorResponse")
-const SuccessResponse = require("../utils/SuccessResponse")
-const { compareHashPassword, generatePassowrdHash, generateToken } = require("../lib/crypto")
+const User = require("../models/auth.model");
+const ErrorResponse = require("../utils/ErrorResponse");
+const SuccessResponse = require("../utils/SuccessResponse");
+const {
+  compareHashPassword,
+  generatePasswordHash,
+  generateToken,
+} = require("../lib/crypto");
 
 /**
  * @desc    Register a new user
@@ -10,58 +14,60 @@ const { compareHashPassword, generatePassowrdHash, generateToken } = require("..
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password } = req.body;
 
     console.log("Registering user:", { name, email });
-    
-    // Validate input
+
     if (!name || !email || !password) {
-      throw new ErrorResponse("All fields are required", 400)
+      throw new ErrorResponse("All fields are required", 400);
     }
 
     if (password.length < 6) {
-      throw new ErrorResponse("Password must be at least 6 characters long", 400)
+      throw new ErrorResponse(
+        "Password must be at least 6 characters long",
+        400
+      );
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email })
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      throw new ErrorResponse("User already exists", 400)
+      throw new ErrorResponse("User already exists", 400);
     }
 
-    // Hash password
-    const hashedPassword = await generatePassowrdHash(password)
+    // const hashedPassword = await generatePasswordHash(password);
 
-    // Create user
     const user = new User({
       name,
       email,
-      password: hashedPassword,
-      isVerified: true, // Auto-verify users
+      password: password,
+      isVerified: true,
       provider: "local",
-    })
+    });
 
-    await user.save()
+    await user.save();
 
-    // Generate JWT token
-    const token = generateToken(user._id)
+    const token = generateToken(user._id);
 
-    const response = new SuccessResponse("User registered successfully. You can now login.", 201, {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-      },
-      token,
-    })
+    const response = new SuccessResponse(
+      "User registered successfully. You can now login.",
+      201,
+      {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isVerified: user.isVerified,
+        },
+        token,
+      }
+    );
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Login user
@@ -70,26 +76,30 @@ const register = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
+
+    console.log("Login attempt:", { email, password });
 
     if (!email || !password) {
-      throw new ErrorResponse("Email and password are required", 400)
+      throw new ErrorResponse("Email and password are required", 400);
     }
 
-    // Find user
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      throw new ErrorResponse("Invalid credentials", 401)
+      console.log("User not found for email:", email);
+      throw new ErrorResponse("Invalid credentials", 401);
     }
 
-    // Check password
-    const isPasswordValid = await compareHashPassword(password, user.password)
-    if (!isPasswordValid) {
-      throw new ErrorResponse("Invalid credentials", 401)
+    console.log("Found user:", { id: user._id, email: user.email, storedPassword: user.password });
+
+    // const isPasswordValid = await compareHashPassword(password, user.password);
+    // console.log("Password comparison result:", isPasswordValid);
+
+    if (!password===user.password) {
+      throw new ErrorResponse("Invalid credentials", 401);
     }
 
-    // Generate JWT token
-    const token = generateToken(user._id)
+    const token = generateToken(user._id);
 
     const response = new SuccessResponse("Login successful", 200, {
       user: {
@@ -99,13 +109,13 @@ const login = async (req, res, next) => {
         role: user.role,
       },
       token,
-    })
+    });
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    OAuth Login
@@ -114,10 +124,10 @@ const login = async (req, res, next) => {
  */
 const oauthLogin = async (req, res, next) => {
   try {
-    const { name, email, provider } = req.body
+    const { name, email, provider } = req.body;
 
     // Check if the user already exists in the database
-    let user = await User.findOne({ email })
+    let user = await User.findOne({ email });
 
     if (!user) {
       // If the user does not exist, create a new user
@@ -126,13 +136,13 @@ const oauthLogin = async (req, res, next) => {
         email,
         isVerified: true, // Automatically verify for OAuth users
         provider: provider || "google",
-      })
+      });
 
-      await user.save()
+      await user.save();
     }
 
     // Generate JWT token
-    const token = generateToken(user._id)
+    const token = generateToken(user._id);
 
     const response = new SuccessResponse("User logged in via OAuth", 200, {
       user: {
@@ -142,13 +152,13 @@ const oauthLogin = async (req, res, next) => {
         role: user.role,
       },
       token,
-    })
+    });
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Get current user profile
@@ -157,30 +167,34 @@ const oauthLogin = async (req, res, next) => {
  */
 const getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select("-password")
+    const user = await User.findById(req.user._id).select("-password");
 
     if (!user) {
-      throw new ErrorResponse("User not found", 404)
+      throw new ErrorResponse("User not found", 404);
     }
 
-    const response = new SuccessResponse("Profile retrieved successfully", 200, {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-        provider: user.provider,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    })
+    const response = new SuccessResponse(
+      "Profile retrieved successfully",
+      200,
+      {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isVerified: user.isVerified,
+          provider: user.provider,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      }
+    );
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Update user profile
@@ -189,20 +203,20 @@ const getProfile = async (req, res, next) => {
  */
 const updateProfile = async (req, res, next) => {
   try {
-    const { name } = req.body
+    const { name } = req.body;
 
     if (!name) {
-      throw new ErrorResponse("Name is required", 400)
+      throw new ErrorResponse("Name is required", 400);
     }
 
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.user._id);
 
     if (!user) {
-      throw new ErrorResponse("User not found", 404)
+      throw new ErrorResponse("User not found", 404);
     }
 
-    user.name = name
-    await user.save()
+    user.name = name;
+    await user.save();
 
     const response = new SuccessResponse("Profile updated successfully", 200, {
       user: {
@@ -211,13 +225,13 @@ const updateProfile = async (req, res, next) => {
         email: user.email,
         role: user.role,
       },
-    })
+    });
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Change password
@@ -226,41 +240,50 @@ const updateProfile = async (req, res, next) => {
  */
 const changePassword = async (req, res, next) => {
   try {
-    const { oldPassword, newPassword } = req.body
+    const { oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
-      throw new ErrorResponse("Old password and new password are required", 400)
+      throw new ErrorResponse(
+        "Old password and new password are required",
+        400
+      );
     }
 
     if (newPassword.length < 6) {
-      throw new ErrorResponse("New password must be at least 6 characters long", 400)
+      throw new ErrorResponse(
+        "New password must be at least 6 characters long",
+        400
+      );
     }
 
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(req.user._id);
 
     if (!user) {
-      throw new ErrorResponse("User not found", 404)
+      throw new ErrorResponse("User not found", 404);
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await compareHashPassword(oldPassword, user.password)
+    const isCurrentPasswordValid = await compareHashPassword(
+      oldPassword,
+      user.password
+    );
     if (!isCurrentPasswordValid) {
-      throw new ErrorResponse("Current password is incorrect", 400)
+      throw new ErrorResponse("Current password is incorrect", 400);
     }
 
     // Hash new password
-    const hashedNewPassword = await generatePassowrdHash(newPassword)
+    const hashedNewPassword = await generatePassowrdHash(newPassword);
 
     // Update password
-    user.password = hashedNewPassword
-    await user.save()
+    user.password = hashedNewPassword;
+    await user.save();
 
-    const response = new SuccessResponse("Password changed successfully", 200)
-    res.status(response.statusCode).json(response)
+    const response = new SuccessResponse("Password changed successfully", 200);
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Forgot password
@@ -269,42 +292,42 @@ const changePassword = async (req, res, next) => {
  */
 const forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body
+    const { email } = req.body;
 
     if (!email) {
-      throw new ErrorResponse("Email is required", 400)
+      throw new ErrorResponse("Email is required", 400);
     }
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
       // Don't reveal if user exists or not for security
       const response = new SuccessResponse(
         "If an account with that email exists, we have sent a password reset link.",
-        200,
-      )
-      return res.status(response.statusCode).json(response)
+        200
+      );
+      return res.status(response.statusCode).json(response);
     }
 
     // Generate reset token
-    const resetToken = require("crypto").randomBytes(32).toString("hex")
-    const resetTokenExpiry = new Date(Date.now() + 3600000) // 1 hour
+    const resetToken = require("crypto").randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
 
-    user.resetToken = resetToken
-    user.resetTokenExpiry = resetTokenExpiry
-    await user.save()
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
 
     // TODO: Send password reset email
     // await sendPasswordResetEmail(email, resetToken);
 
     const response = new SuccessResponse(
       "If an account with that email exists, we have sent a password reset link.",
-      200,
-    )
-    res.status(response.statusCode).json(response)
+      200
+    );
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Reset password
@@ -313,40 +336,43 @@ const forgotPassword = async (req, res, next) => {
  */
 const resetPassword = async (req, res, next) => {
   try {
-    const { token, password } = req.body
+    const { token, password } = req.body;
 
     if (!token || !password) {
-      throw new ErrorResponse("Token and password are required", 400)
+      throw new ErrorResponse("Token and password are required", 400);
     }
 
     if (password.length < 6) {
-      throw new ErrorResponse("Password must be at least 6 characters long", 400)
+      throw new ErrorResponse(
+        "Password must be at least 6 characters long",
+        400
+      );
     }
 
     const user = await User.findOne({
       resetToken: token,
       resetTokenExpiry: { $gt: Date.now() },
-    })
+    });
 
     if (!user) {
-      throw new ErrorResponse("Invalid or expired reset token", 400)
+      throw new ErrorResponse("Invalid or expired reset token", 400);
     }
 
     // Hash new password
-    const hashedPassword = await generatePassowrdHash(password)
+    const hashedPassword = await generatePassowrdHash(password);
 
     // Update user password and clear reset token
-    user.password = hashedPassword
-    user.resetToken = undefined
-    user.resetTokenExpiry = undefined
-    await user.save()
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
 
-    const response = new SuccessResponse("Password reset successfully", 200)
-    res.status(response.statusCode).json(response)
+    const response = new SuccessResponse("Password reset successfully", 200);
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 /**
  * @desc    Get user by ID
@@ -355,12 +381,12 @@ const resetPassword = async (req, res, next) => {
  */
 const getUserById = async (req, res, next) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
 
-    const user = await User.findById(id).select("-password")
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
-      throw new ErrorResponse("User not found", 404)
+      throw new ErrorResponse("User not found", 404);
     }
 
     const response = new SuccessResponse("User retrieved successfully", 200, {
@@ -374,13 +400,13 @@ const getUserById = async (req, res, next) => {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
-    })
+    });
 
-    res.status(response.statusCode).json(response)
+    res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 // Export all functions using CommonJS
 module.exports = {
@@ -393,4 +419,4 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getUserById,
-}
+};

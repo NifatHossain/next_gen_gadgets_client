@@ -1,7 +1,6 @@
-const mongoose = require("mongoose")
-const { compareHashPassword, generatePassowrdHash } = require("../lib/crypto")
+const mongoose = require("mongoose");
+const { compareHashPassword, generatePasswordHash } = require("../lib/crypto");
 
-// User schema definition
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -26,7 +25,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider === "local"
+        return this.provider === "local";
       },
       minlength: [6, "Password must be at least 6 characters long"],
     },
@@ -47,33 +46,30 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
-  },
-)
+    timestamps: true,
+  }
+);
 
-// Hash the password before saving the user
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) {
-    return next()
+    return next();
   }
 
   try {
-    this.password = await generatePassowrdHash(this.password)
-    next()
+    this.password = await generatePasswordHash(this.password);
+    next();
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function (enteredPassword) {
   if (!this.password) {
-    return false
+    return false;
   }
-  return await compareHashPassword(enteredPassword, this.password)
-}
+  return await compareHashPassword(enteredPassword, this.password);
+};
 
-// Create and export the User model
-const User = mongoose.model("User", userSchema)
+const User = mongoose.model("User", userSchema);
 
-module.exports = User
+module.exports = User;

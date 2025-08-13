@@ -6,7 +6,7 @@ export const userSlice = createSlice({
     isLoggedIn: false,
     name: "",
     email: "",
-    role: "user",
+    role: "",
     token: null,
     id: null,
   },
@@ -16,7 +16,7 @@ export const userSlice = createSlice({
       state.isLoggedIn = true
       state.name = action.payload.name
       state.email = action.payload.email
-      state.role = action.payload.role || "user"
+      state.role = action.payload.role || "" 
       state.id = action.payload.id
       if (action.payload.token) {
         state.token = action.payload.token
@@ -35,7 +35,7 @@ export const userSlice = createSlice({
       state.isLoggedIn = false
       state.name = ""
       state.email = ""
-      state.role = "user"
+      state.role = ""
       state.token = null
       state.id = null
     },

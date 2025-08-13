@@ -1,10 +1,14 @@
 "use client";
 import React from "react";
-import { useAppDispatch } from "@/lib/hooks";
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { addToCart } from "@/_features/cartSlice";
+import toast from "react-hot-toast";
 
 export default function HomePage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { isLoggedIn } = useAppSelector((state) => state.user);
 
   // Hardcoded content for the homepage
   const promotions = [
@@ -30,6 +34,12 @@ export default function HomePage() {
   ];
 
   const handleAddToCart = (product) => {
+    if (!isLoggedIn) {
+      toast.error("Please log in to add products to your cart.");
+      router.push("/login");
+      return;
+    }
+
     dispatch(
       addToCart({
         id: product.id,
@@ -40,6 +50,7 @@ export default function HomePage() {
         stock: 99999, // Replace with actual stock from backend if available
       })
     );
+    toast.success(`${product.name} added to cart!`);
   };
 
   return (
