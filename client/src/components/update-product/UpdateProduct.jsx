@@ -15,8 +15,8 @@ const UpdateProduct = () => {
     formState: { errors },
     reset,
   } = useForm();
-  const categories = ["Laptop", "Mobile", "Tablet", "Monitor"];
-  const categories1 = UseGetCategories();
+  // const categories = ["Laptop", "Mobile", "Tablet", "Monitor"];
+  const [categories,categoryLoading] = UseGetCategories();
   const { productId } = useParams();
   const [product, loading] = useGetSingleProduct({ productId });
   console.log("Product:", product);
@@ -164,7 +164,7 @@ const UpdateProduct = () => {
                 }
               >
                 <option value="">Select a category</option>
-                {categories.map((cat, idx) => (
+                {categoryLoading? <option>Loading...</option> : categories.map((cat, idx) => (
                   <option key={idx} value={cat}>
                     {cat}
                   </option>

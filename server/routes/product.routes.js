@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct, getAllCategories } = require("../controllers/product.controller");
+const { addProduct, getAllProducts, getProductsByCategory, getSingleProduct, deleteSingleProduct, updateProduct, getAllCategories, getLatestProducts } = require("../controllers/product.controller");
 
 /**
  * @route POST /addProduct
@@ -63,5 +63,14 @@ router.patch("/updateProduct/:productId", updateProduct);
 router.delete("/deleteProduct/:productId", deleteSingleProduct);
 
 router.get("/allCategories",getAllCategories);
+
+/**	
+ * @route GET /latestProducts
+ * @description Get the latest products	
+ * @returns {object} 200 - success response
+ * @returns {Error} 500 - Server error
+ * @returns {object} 404 - No products found
+ */
+router.get("/getLatestProducts", getLatestProducts)
 
 module.exports = router;

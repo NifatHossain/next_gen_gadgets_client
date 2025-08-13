@@ -169,6 +169,16 @@ const getAllCategories = async (req, res) => {
   }
 };
 
+const getLatestProducts = async (req, res) => {
+  try {
+	const products = await Product.find().sort({ createdAt: -1 }).limit(6);
+	res.status(200).json(products);
+  } catch (error) {
+	console.error("Error fetching latest products:", error);
+	res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   addProduct,
   getAllProducts,
@@ -176,5 +186,6 @@ module.exports = {
   getSingleProduct,
   updateProduct,
   deleteSingleProduct,
-  getAllCategories
+  getAllCategories,
+  getLatestProducts
 };
