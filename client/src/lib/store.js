@@ -1,25 +1,23 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit"
-import { persistReducer } from "redux-persist"
-import storage from "redux-persist/lib/storage"
-import userReducer from "@/_features/userSlice"
-import { authApi } from "@/_features/apiSlice/authApi"
-// import { productsApi } from "./api/productsApi"
-// import { usersApi } from "./api/usersApi"
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import userReducer from "@/_features/userSlice";
+import cartReducer from "@/_features/cartSlice";
+import { authApi } from "@/_features/apiSlice/authApi";
 
 const rootReducer = combineReducers({
   user: userReducer,
+  cart: cartReducer,
   [authApi.reducerPath]: authApi.reducer,
-  // [productsApi.reducerPath]: productsApi.reducer,
-  // [usersApi.reducerPath]: usersApi.reducer,
-})
+});
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user"], // only persist the user slice
-}
+  whitelist: ["user", "cart"],
+};
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const makeStore = () => {
   return configureStore({
@@ -27,8 +25,17 @@ export const makeStore = () => {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+          // redux-persist actions to ignore
+          ignoredActions: [
+            "persist/PERSIST",
+            "persist/REHYDRATE",
+            "persist/PAUSE",
+            "persist/FLUSH",
+            "persist/PURGE",
+            "persist/REGISTER",
+          ],
         },
       }).concat(authApi.middleware),
-  })
-}
+    devTools: process.env.NODE_ENV !== "production",
+  });
+};
