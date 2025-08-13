@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+/**
+ * 
+ * this hook is used to fetch all categories from the server
+ * we are sending the categories and loading state as an array
+ */
 const UseGetCategories = () => {
   const [categories, setCategories] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(true);

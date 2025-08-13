@@ -21,6 +21,11 @@ const UpdateProduct = () => {
   console.log(categories)
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
+  /** 
+   * in this onSubmit function we are trying to update the product
+   * we are using patch method to update the product, so that we can update only the fields that have changed
+   * if we use put method then we have to change all the fields even if they are not changed
+  */
   const onSubmit = async(data) => {
     const formData = new FormData();
     formData.append("productName", data.productName);

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-
+/**
+ * 
+ * this hook is used to fetch products based on category 
+ * it takes category name as a parameter
+ * we are sending the products and loading state as an object
+ */
 const UseGetCategoryWiseProduct = (categoryName) => {
   const [categoryProducts, setCategoryProducts] = useState([]);
 	const [categoryLoading, setCategoryLoading] = useState(true);

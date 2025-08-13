@@ -9,6 +9,13 @@ import UseGetAllProducts from "@/hooks/UseGetAllProducts";
 const AllProductsForAdmin = () => {
   const { products, isLoading } = UseGetAllProducts();
 
+  /**
+   *
+   * Function to handle product deletion
+   * productId is sent as a parameter to function, then we call the API to delete the product
+   * On success, we show a success toast and reload the page to reflect changes
+   * On error, we log the error and show an error toast
+   */
   const handleDeleteProduct = (productId) => {
     axios
       .delete(
@@ -65,6 +72,10 @@ const AllProductsForAdmin = () => {
                   ৳ {product.price}
                 </td>
                 <td className="px-4 py-2 border border-gray-200">
+                  /** *Link tag to navigate to the update product page
+                  *product._id is passed as a parameter to the URL
+                  *update-product page will use this id to fetch the product
+                  details for updating */
                   <Link
                     className="bg-blue-500 text-white px-3 py-1 rounded mr-2"
                     href={`/update-product/${product._id}`}

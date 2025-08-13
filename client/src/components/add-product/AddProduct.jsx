@@ -13,30 +13,38 @@ const AddProduct = () => {
     formState: { errors },
     reset,
   } = useForm();
-//   const categories = ["Laptop", "Phone", "Tablet", "Smatrtwatch"];
-  const [categories,categoryLoading] = UseGetCategories();
+  //   const categories = ["Laptop", "Phone", "Tablet", "Smatrtwatch"];
+  const [categories, categoryLoading] = UseGetCategories();
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     const formData = new FormData();
     formData.append("productName", data.productName);
-	formData.append("brandName", data.brandName);
-	formData.append("productStock", data.productStock);
+    formData.append("brandName", data.brandName);
+    formData.append("productStock", data.productStock);
     formData.append("price", data.price);
     formData.append("description", data.description);
+	/**
+	 * if isAddingCategory is true then we are adding a new category
+	 * otherwise we are using the selected category from the dropdown
+	 * it is basically a ternary operation
+	 */
     const categoryValue = isAddingCategory ? data.newCategory : data.category;
-  formData.append("category", categoryValue);
+    formData.append("category", categoryValue);
     formData.append("imageURL", data.imageURL);
 
     console.log("Form Data ready to send:", data);
-	try {
-		const res = await axios.post('http://localhost:3002/api/v1/addProduct', data);	
-		console.log("Product saved:", res.data);
-		toast.success("Product added successfully!");
-	} catch (err) {
-		console.error("Error saving product:", err);
-		toast.error("Failed to add product.");
-	}
+    try {
+      const res = await axios.post(
+        "http://localhost:3002/api/v1/addProduct",
+        data
+      );
+      console.log("Product saved:", res.data);
+      toast.success("Product added successfully!");
+    } catch (err) {
+      console.error("Error saving product:", err);
+      toast.error("Failed to add product.");
+    }
 
     reset();
     setIsAddingCategory(false);
@@ -52,18 +60,24 @@ const AddProduct = () => {
             <label className="block mb-1 font-medium">Product Name</label>
             <input
               type="text"
-              {...register("productName", { required: "Product name is required" })}
+              {...register("productName", {
+                required: "Product name is required",
+              })}
               className="w-full border rounded p-2"
             />
             {errors.name && (
-              <p className="text-red-500 text-sm">{errors.productName.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.productName.message}
+              </p>
             )}
           </div>
           <div>
             <label className="block mb-1 font-medium">Brand Name</label>
             <input
               type="text"
-              {...register("brandName", { required: "Product brand name is required" })}
+              {...register("brandName", {
+                required: "Product brand name is required",
+              })}
               className="w-full border rounded p-2"
             />
             {errors.name && (
@@ -86,11 +100,15 @@ const AddProduct = () => {
             <label className="block mb-1 font-medium">Enter Quantity</label>
             <input
               type="number"
-              {...register("productStock", { required: "Quantity is required" })}
+              {...register("productStock", {
+                required: "Quantity is required",
+              })}
               className="w-full border rounded p-2"
             />
             {errors.price && (
-              <p className="text-red-500 text-sm">{errors.productStock.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.productStock.message}
+              </p>
             )}
           </div>
 
@@ -132,11 +150,15 @@ const AddProduct = () => {
               }
             >
               <option value="">Select a category</option>
-              {categoryLoading? <option>Loading...</option> : categories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              {categoryLoading ? (
+                <option>Loading...</option>
+              ) : (
+                categories.map((cat, idx) => (
+                  <option key={idx} value={cat}>
+                    {cat}
+                  </option>
+                ))
+              )}
               <option value="add-new" className="text-blue-300">
                 {" "}
                 Add New Category
