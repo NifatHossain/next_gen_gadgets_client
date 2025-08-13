@@ -1,111 +1,128 @@
-import React, { useState } from "react";
-import "../searching-filtering/Product.css";
+"use client"
 
-function Searching() {
-  const [query, setQuery] = useState("");
-  const items = ["Computer", "Laptop", "Mobile", "Mouse", "Headphone"];
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import axios from "axios"
+import { useAppSelector, useAppDispatch } from "@/lib/hooks"
+import { addToCart } from "@/_features/cartSlice"
+import toast from "react-hot-toast"
+import { FaSearch } from "react-icons/fa"
 
-  // Filter items based on search query
-  const filteredItems = items.filter((item) =>
-    item.toLowerCase().includes(query.toLowerCase())
-  );
+const Searching = () => {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [sortBy, setSortBy] = useState("name")
+  const [sortOrder, setSortOrder] = useState("asc")
+  const [products, setProducts] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+  const { isLoggedIn } = useAppSelector((state) => state.user)
+
+  const handleSearch = async (e) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a search query.")
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/search`, {
+        params: { query: searchQuery, sortBy, sortOrder },
+      })
+      if (response.data.success) {
+        setProducts(response.data.data.products || [])
+      } else {
+        setError(response.data.error || "No products found.")
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to load search results.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAddToCart = (product) => {
+    if (!isLoggedIn) {
+      toast.error("Please log in to add products to your cart.")
+      router.push("/login")
+      return
+    }
+
+    dispatch(
+      addToCart({
+        id: product._id,
+        name: product.productName,
+        price: product.price,
+        image: product.imageURL,
+        quantity: 1,
+        stock: product.productStock || 99999,
+      }),
+    )
+    toast.success(`${product.productName} added to cart!`)
+  }
 
   return (
-    <div className="Searching">
-      {/* Search Input */}
-      <input
-        type="text"
-        placeholder="Search..."
-        className="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+    <div className="w-full">
+      <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border border-gray-300 rounded-l-lg px-4 py-2 w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div className="flex gap-2">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-2 focus:outline-none"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="price">Sort by Price</option>
+          </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-2 focus:outline-none"
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <FaSearch />
+            Search
+          </button>
+        </div>
+      </form>
 
-      {/* Filtered List */}
-      <ul className="list">
-        {filteredItems.length > 0 ? (
-          filteredItems.map((item, index) => (
-            <li key={index} className="listItem">
-              {item}
-            </li>
-          ))
-        ) : (
-          <li className="listItem">No items found</li>
-        )}
-      </ul>
+      {isLoading && <div className="mt-4 text-center">Loading...</div>}
+      {error && <div className="mt-4 text-center text-red-500">{error}</div>}
+      {products.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {products.map((product) => (
+            <div key={product._id} className="border rounded-lg p-3 shadow hover:shadow-lg">
+              <img src={product.imageURL} alt={product.productName} className="w-full h-40 object-cover rounded" />
+              <h3 className="mt-2 font-medium">{product.productName}</h3>
+              <p className="text-red-500 font-bold">{product.price}৳</p>
+              <button
+                onClick={() => handleAddToCart(product)}
+                className="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+              >
+                Add to Cart
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
-export default Searching;
-
-
-
-// import "../searching-filtering/Product.css";
-// function Searching(){
-//     const[query,setQuery]=useState("");
-//     const items = ['Computer', 'Laptop', 'Mobile', 'Mouse', 'Headphone'];
-//     const filteredItems = items.filter(item =>
-//     item.toLowerCase().includes(query.toLowerCase())
-//   );
-//     return(
-//         <div className=" Searching">
-//     <input type="text" placeholder="Search..." className="search" onChange={e=> setQuery(e.target.value)}/>
-//     <ul className="list">
-//         <li className="listItem ">Computer</li>
-//         <li className="listItem">Laptop</li>
-//         <li className="listItem">Mobile</li>
-//         <li className="listItem ">Mouse</li>
-//         <li className="listItem ">Headphone</li>
-//     </ul>
-//     </div>
-//     );
-// }
-// export default Searching;
-
-
-// import React, { useState } from 'react';
-// import { Data } from './Data';
-
-// const Page = () => {
-//   const [store] = useState(Data);
-//   const [data, setData] = useState('');
-
-//   const getData = (e) => {
-//     console.log(e.target.value);
-//     setData(e.target.value);
-//   };
-
-//   // Optional: Filter the data based on search input
-//   const filteredStore = store.filter((item) =>
-//     item.name.toLowerCase().includes(data.toLowerCase())
-//   );
-
-//   return (
-//     <div className='container'>
-//       <h1>This is login components</h1>
-//       <input
-//         type='text'
-//         placeholder='Search here...'
-//         onChange={getData}
-//       />
-
-//       <div className='type'>
-//         <h3>Name</h3>
-//         <h3>Brand</h3>
-//         <h3>Images</h3>
-//       </div>
-
-//       {/* map method creates a new array to iterate the value of array */}
-//       {filteredStore.map((cur, index) => (
-//         <div className='itemlist' key={index}>
-//           <p>{cur.name}</p>
-//           <p>{cur.brand}</p>
-//           <img src={cur.img} alt={cur.name} />
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Searching;
+export default Searching
