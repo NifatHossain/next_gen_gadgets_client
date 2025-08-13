@@ -1,3 +1,4 @@
+const { get } = require("mongoose");
 const Product = require("../models/product.model");
 const SuccessResponse = require("../utils/SuccessResponse");
 const ErrorResponse = require("../utils/ErrorResponse");
@@ -73,16 +74,19 @@ const getProductsByCategory = async (req, res, next) => {
     const response = new SuccessResponse("Products retrieved successfully", 200, { products });
     res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error);
+    console.error("Error fetching products by category:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 /**
- * @desc    Get a single product by ID
- * @route   GET /api/v1/singleProduct/:productId
- * @access  Public
+ * @desc Get a single product by its ID
+ * @route GET /api/v1/singleProduct/:productId	
+ * @param {string} productId.required - Product ID
+ * @returns {object} 200 - success response
+ * @returns {Error} 404 - Product not found
  */
-const getSingleProduct = async (req, res, next) => {
+const getSingleProduct = async (req, res) => {
   try {
     const { productId } = req.params;
 
@@ -95,16 +99,19 @@ const getSingleProduct = async (req, res, next) => {
     const response = new SuccessResponse("Product retrieved successfully", 200, { product });
     res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error);
+    console.error("Error fetching product by ID:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 /**
- * @desc    Update a product by ID
- * @route   PATCH /api/v1/updateProduct/:productId
- * @access  Private (Admin)
+ * @desc Update a single product by its ID
+ * @route PATCH /api/v1/updateProduct/:productId	
+ * @param {string} productId.required - Product ID
+ * @returns {object} 200 - success response
+ * @returns {Error} 404 - Product not found
  */
-const updateProduct = async (req, res, next) => {
+const updateProduct = async (req, res) => {
   try {
     const { productId } = req.params;
     const updateData = req.body;
@@ -125,16 +132,20 @@ const updateProduct = async (req, res, next) => {
     const response = new SuccessResponse("Product updated successfully", 200, { product: updatedProduct });
     res.status(response.statusCode).json(response);
   } catch (error) {
-    next(error);
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-/**
- * @desc    Delete a product by ID
- * @route   DELETE /api/v1/deleteProduct/:productId
- * @access  Private (Admin)
- */
-const deleteSingleProduct = async (req, res, next) => {
+/** 
+ * @desc Delete a single product by its ID
+ * @route DELETE /api/v1/deleteProduct/:productId	
+ * @param {string} productId.required - Product ID
+ * @returns {object} 200 - success response
+ * @returns {Error} 404 - Product not found
+*/
+const deleteSingleProduct = async (req, res) => {
+	console.log("Delete single product controller called");
   try {
     const { productId } = req.params;
 
@@ -144,64 +155,26 @@ const deleteSingleProduct = async (req, res, next) => {
 
     const deletedProduct = await Product.findByIdAndDelete(productId);
     if (!deletedProduct) {
-      throw new ErrorResponse("Product not found", 404);
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    const response = new SuccessResponse("Product deleted successfully", 200);
-    res.status(response.statusCode).json(response);
+    res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
-    next(error);
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-/**
- * @desc    Search and filter products
- * @route   GET /api/v1/search
- * @access  Public
- */
-const searchProducts = async (req, res, next) => {
+const getAllCategories = async (req, res) => {
   try {
-    const { query, sortBy, sortOrder } = req.query;
-
-    // Build the query object
-    let searchQuery = {};
-    if (query) {
-      searchQuery.productName = { $regex: query, $options: "i" }; // Case-insensitive search
-    }
-
-    // Build the sort object
-    let sortOptions = {};
-    if (sortBy === "price") {
-      sortOptions.price = sortOrder === "desc" ? -1 : 1;
-    } else if (sortBy === "name") {
-      sortOptions.productName = sortOrder === "desc" ? -1 : 1;
-    }
-
-    const products = await Product.find(searchQuery).sort(sortOptions);
-
-    if (products.length === 0) {
-      throw new ErrorResponse("No products found", 404);
-    }
-
-    const response = new SuccessResponse("Products retrieved successfully", 200, { products });
-    res.status(response.statusCode).json(response);
+	const categories = await Product.distinct("category");
+	if (!categories || categories.length === 0) {
+	  return res.status(404).json({ message: "No categories found" });
+	}
+	res.status(200).json(categories);
   } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @desc    Get all categories
- * @route   GET /api/v1/all-categories
- * @access  Public
- */
-const getAllCategories = async (req, res, next) => {
-  try {
-    const categories = await Product.distinct("category");
-    const response = new SuccessResponse("Categories retrieved successfully", 200, { categories });
-    res.status(response.statusCode).json(response);
-  } catch (error) {
-    next(error);
+	console.error("Error fetching categories:", error);
+	res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -212,6 +185,5 @@ module.exports = {
   getSingleProduct,
   updateProduct,
   deleteSingleProduct,
-  searchProducts,
-  getAllCategories,
+  getAllCategories
 };

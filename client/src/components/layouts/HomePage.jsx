@@ -6,6 +6,7 @@ import { addToCart } from "@/_features/cartSlice";
 import toast from "react-hot-toast";
 
 export default function HomePage() {
+
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isLoggedIn } = useAppSelector((state) => state.user);
