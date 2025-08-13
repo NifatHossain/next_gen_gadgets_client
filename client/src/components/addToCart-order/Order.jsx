@@ -39,7 +39,7 @@ const Order = () => {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  const [deliveryMethod, setDeliveryMethod] = useState("Home Delivery - 60৳");
+  const [deliveryMethod, setDeliveryMethod] = useState("Store Pickup - 0৳");
 
   const handleChange = (e) => {
     setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });

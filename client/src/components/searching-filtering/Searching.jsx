@@ -66,7 +66,7 @@ const Searching = () => {
   }
 
   return (
-    <div className="w-full">
+    <div className="relative p-4 bg-white shadow-md rounded-lg flex flex-col items-center">
       <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-2">
         <input
           type="text"

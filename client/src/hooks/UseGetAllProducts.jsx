@@ -1,32 +1,19 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const UseGetAllProducts = () => {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    setIsLoading(true);
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/getAllProducts`)
-      .then((response) => {
-        if (response.data.success) {
-          setData(response.data.data || []);
-        } else {
-          setError("Failed to fetch products.");
-        }
+    fetch(`http://localhost:3002/api/v1/getAllProducts`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error fetching products:", err);
-        setError(err.response?.data?.error || "Failed to fetch products.");
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
-  return { data, isLoading, error };
+  return [products, loading];
 };
 
 export default UseGetAllProducts;
